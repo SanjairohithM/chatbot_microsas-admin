@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password_hash String
+  name          String
+  role          String         @default("user") // "user" or "admin"
+  is_active     Boolean        @default(true)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  bots          Bot[]
+  conversations Conversation[]
+
+  @@map("users")
+}
+
+model Bot {
+  id                  Int                 @id @default(autoincrement())
+  user_id             Int
+  name                String
+  description         String?
+  system_prompt       String?
+  model               String              @default("deepseek-chat")
+  temperature         Float               @default(0.7)
+  max_tokens          Int                 @default(1000)
+  status              String              @default("draft")
+  is_deployed         Boolean             @default(false)
+  deployment_url      String?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  analytics           BotAnalytics[]
+  settings            BotSettings[]
+  user                User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversations       Conversation[]
+  knowledge_documents KnowledgeDocument[]
+
+  @@map("bots")
+}
+
+model KnowledgeDocument {
+  id               Int      @id @default(autoincrement())
+  bot_id           Int
+  title            String
+  content          String
+  file_url         String?
+  file_type        String?
+  file_size        Int?
+  status           String   @default("processing")
+  processing_error String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  bot              Bot      @relation(fields: [bot_id], references: [id], onDelete: Cascade)
+
+  @@map("knowledge_documents")
+}
+
+model Conversation {
+  id         Int       @id @default(autoincrement())
+  bot_id     Int
+  user_id    Int
+  title      String?
+  is_test    Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  bot        Bot       @relation(fields: [bot_id], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  messages   Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id               Int          @id @default(autoincrement())
+  conversation_id  Int
+  role             String
+  content          String
+  image_url        String?
+  image_analysis   String?
+  tokens_used      Int?
+  response_time_ms Int?
+  created_at       DateTime     @default(now())
+  conversation     Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model BotAnalytics {
+  id                      Int      @id @default(autoincrement())
+  bot_id                  Int
+  date                    DateTime @db.Date
+  total_conversations     Int      @default(0)
+  total_messages          Int      @default(0)
+  total_tokens_used       Int      @default(0)
+  avg_response_time_ms    Float?
+  user_satisfaction_score Float?
+  created_at              DateTime @default(now())
+  bot                     Bot      @relation(fields: [bot_id], references: [id], onDelete: Cascade)
+
+  @@unique([bot_id, date])
+  @@map("bot_analytics")
+}
+
+model BotSettings {
+  id            Int      @id @default(autoincrement())
+  bot_id        Int
+  setting_key   String
+  setting_value String?
+  is_encrypted  Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  bot           Bot      @relation(fields: [bot_id], references: [id], onDelete: Cascade)
+
+  @@unique([bot_id, setting_key])
+  @@map("bot_settings")
+}
