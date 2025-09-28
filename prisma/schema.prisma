@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
+  id            String         @id @default(cuid())
   email         String         @unique
   password_hash String
   name          String
-  role          String         @default("user") // "user" or "admin"
-  is_active     Boolean        @default(true)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
+  is_active     Boolean        @default(true)
+  role          String         @default("user")
   bots          Bot[]
   conversations Conversation[]
 
@@ -24,16 +24,18 @@ model User {
 
 model Bot {
   id                  Int                 @id @default(autoincrement())
-  user_id             Int
+  user_id             String
   name                String
   description         String?
   system_prompt       String?
-  model               String              @default("deepseek-chat")
+  model               String              @default("gpt-4o-mini")
   temperature         Float               @default(0.7)
   max_tokens          Int                 @default(1000)
   status              String              @default("draft")
   is_deployed         Boolean             @default(false)
   deployment_url      String?
+  interaction_mode    String              @default("chat")
+  faq_questions       String?
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
   analytics           BotAnalytics[]
@@ -65,7 +67,7 @@ model KnowledgeDocument {
 model Conversation {
   id         Int       @id @default(autoincrement())
   bot_id     Int
-  user_id    Int
+  user_id    String
   title      String?
   is_test    Boolean   @default(false)
   created_at DateTime  @default(now())

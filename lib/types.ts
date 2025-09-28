@@ -1,6 +1,6 @@
 // Shared types for the application
 export interface User {
-  id: number
+  id: string
   email: string
   name: string
   role: "user" | "admin"
@@ -12,7 +12,7 @@ export interface User {
 
 export interface Bot {
   id: number
-  user_id: number
+  user_id: string
   name: string
   description: string
   system_prompt: string
@@ -43,7 +43,7 @@ export interface KnowledgeDocument {
 export interface Conversation {
   id: number
   bot_id: number
-  user_id: number
+  user_id: string
   title: string
   is_test: boolean
   created_at: string
@@ -71,5 +71,30 @@ export interface BotAnalytics {
   total_tokens_used: number
   avg_response_time_ms: number
   user_satisfaction_score: number
+  created_at: string
+}
+
+export interface DashboardStats {
+  totalUsers: number
+  activeBots: number
+  messagesToday: number
+  successRate: number
+}
+
+export interface RecentBot {
+  id: number
+  name: string
+  status: string
+  messages: number
+  accuracy: number
+  created_at: string
+}
+
+export interface RecentUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  lastActive: string
   created_at: string
 }

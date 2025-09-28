@@ -87,7 +87,7 @@ export class ServerUserService {
     }))
   }
 
-  static async findById(id: number): Promise<User | null> {
+  static async findById(id: string): Promise<User | null> {
     const user = await db.user.findUnique({
       where: { id },
       include: {
@@ -114,7 +114,7 @@ export class ServerUserService {
     }
   }
 
-  static async update(id: number, updates: Partial<{ name: string; email: string; role: "user" | "admin"; is_active: boolean }>): Promise<User | null> {
+  static async update(id: string, updates: Partial<{ name: string; email: string; role: "user" | "admin"; is_active: boolean }>): Promise<User | null> {
     const user = await db.user.update({
       where: { id },
       data: updates,
@@ -140,7 +140,7 @@ export class ServerUserService {
     }
   }
 
-  static async delete(id: number): Promise<boolean> {
+  static async delete(id: string): Promise<boolean> {
     try {
       await db.user.delete({
         where: { id },
@@ -154,7 +154,7 @@ export class ServerUserService {
 
 // Bot operations (server-side only)
 export class ServerBotService {
-  static async create(userId: number, botData: Partial<Bot>): Promise<Bot> {
+  static async create(userId: string, botData: Partial<Bot>): Promise<Bot> {
     const bot = await db.bot.create({
       data: {
         user_id: userId,
@@ -187,7 +187,7 @@ export class ServerBotService {
     }
   }
 
-  static async findByUserId(userId: number): Promise<Bot[]> {
+  static async findByUserId(userId: string): Promise<Bot[]> {
     const bots = await db.bot.findMany({
       where: { user_id: userId },
       orderBy: { created_at: 'desc' },
@@ -328,7 +328,7 @@ export class ServerKnowledgeDocumentService {
 
 // Conversation operations (server-side only)
 export class ServerConversationService {
-  static async create(botId: number, userId: number, title?: string, isTest = false): Promise<Conversation> {
+  static async create(botId: number, userId: string, title?: string, isTest = false): Promise<Conversation> {
     const conversation = await db.conversation.create({
       data: {
         bot_id: botId,
@@ -349,7 +349,7 @@ export class ServerConversationService {
     }
   }
 
-  static async findByUserId(userId: number): Promise<Conversation[]> {
+  static async findByUserId(userId: string): Promise<Conversation[]> {
     const conversations = await db.conversation.findMany({
       where: { user_id: userId },
       include: {

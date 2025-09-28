@@ -41,6 +41,7 @@ import {
   Bot,
   MessageSquare,
   Calendar,
+  MessageCircle,
 } from "lucide-react"
 import { format } from "date-fns"
 
@@ -48,9 +49,10 @@ interface UserTableProps {
   users: User[]
   loading: boolean
   onEdit: (user: User) => void
-  onDelete: (userId: number) => void
+  onDelete: (userId: string) => void
   onView: (user: User) => void
   onCreate: () => void
+  onViewChats?: (user: User) => void
 }
 
 export function UserTable({ 
@@ -59,7 +61,8 @@ export function UserTable({
   onEdit, 
   onDelete, 
   onView, 
-  onCreate 
+  onCreate,
+  onViewChats
 }: UserTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -210,6 +213,12 @@ export function UserTable({
                           <Edit className="w-4 h-4 mr-2" />
                           Edit User
                         </DropdownMenuItem>
+                        {onViewChats && (
+                          <DropdownMenuItem onClick={() => onViewChats(user)}>
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            View Chats
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
                           onClick={() => handleDeleteClick(user)}

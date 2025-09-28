@@ -38,9 +38,9 @@ export class UserController {
    */
   static async getUserById(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const id = parseInt(params.id)
+      const id = params.id
 
-      if (isNaN(id)) {
+      if (!id) {
         return ApiResponse.badRequest('Invalid user ID')
       }
 
@@ -62,9 +62,9 @@ export class UserController {
    */
   static async updateUser(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const id = parseInt(params.id)
+      const id = params.id
 
-      if (isNaN(id)) {
+      if (!id) {
         return ApiResponse.badRequest('Invalid user ID')
       }
 
@@ -101,9 +101,9 @@ export class UserController {
    */
   static async deleteUser(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const id = parseInt(params.id)
+      const id = params.id
 
-      if (isNaN(id)) {
+      if (!id) {
         return ApiResponse.badRequest('Invalid user ID')
       }
 
@@ -125,9 +125,9 @@ export class UserController {
    */
   static async getUserStats(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-      const id = parseInt(params.id)
+      const id = params.id
 
-      if (isNaN(id)) {
+      if (!id) {
         return ApiResponse.badRequest('Invalid user ID')
       }
 

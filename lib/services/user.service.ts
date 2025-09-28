@@ -51,7 +51,7 @@ export class UserService {
   /**
    * Get user by ID
    */
-  static async getUserById(id: number): Promise<User | null> {
+  static async getUserById(id: string): Promise<User | null> {
     try {
       const user = await db.user.findUnique({
         where: { id }
@@ -111,7 +111,7 @@ export class UserService {
   /**
    * Update user
    */
-  static async updateUser(id: number, updates: UpdateUserRequest): Promise<User | null> {
+  static async updateUser(id: string, updates: UpdateUserRequest): Promise<User | null> {
     try {
       // Check if user exists
       const existingUser = await db.user.findUnique({
@@ -164,7 +164,7 @@ export class UserService {
   /**
    * Delete user
    */
-  static async deleteUser(id: number): Promise<boolean> {
+  static async deleteUser(id: string): Promise<boolean> {
     try {
       // Check if user exists
       const existingUser = await db.user.findUnique({
@@ -190,7 +190,7 @@ export class UserService {
   /**
    * Get user statistics
    */
-  static async getUserStats(userId: number): Promise<{
+  static async getUserStats(userId: string): Promise<{
     totalBots: number
     activeBots: number
     totalConversations: number
@@ -239,6 +239,8 @@ export class UserService {
       id: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
+      is_active: user.is_active,
       created_at: user.created_at.toISOString(),
     }
   }

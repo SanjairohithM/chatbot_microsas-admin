@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { User } from "@/lib/types"
 
 interface UseUsersReturn {
@@ -9,16 +9,19 @@ interface UseUsersReturn {
   error: string | null
   refetch: () => Promise<void>
   createUser: (userData: { email: string; password: string; name: string; role: "user" | "admin" }) => Promise<User>
-  updateUser: (id: number, updates: Partial<User>) => Promise<User>
-  deleteUser: (id: number) => Promise<void>
+  updateUser: (id: string, updates: Partial<User>) => Promise<User>
+  deleteUser: (id: string) => Promise<void>
 }
 
 export function useUsers(): UseUsersReturn {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const hasFetched = useRef(false)
 
   const fetchUsers = async () => {
+    if (hasFetched.current) return
+    hasFetched.current = true
     try {
       setLoading(true)
       setError(null)
@@ -29,7 +32,11 @@ export function useUsers(): UseUsersReturn {
       }
       
       const data = await response.json()
-      setUsers(data)
+      if (Array.isArray(data)) {
+        setUsers(data)
+      } else {
+        setUsers([])
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -50,12 +57,15 @@ export function useUsers(): UseUsersReturn {
       throw new Error('Failed to create user')
     }
 
-    const newUser = await response.json()
-    setUsers(prev => [newUser, ...prev])
-    return newUser
+    const data = await response.json()
+    if (data && data.id) {
+      setUsers(prev => [data, ...prev])
+      return data
+    }
+    throw new Error('Invalid response from server')
   }
 
-  const updateUser = async (id: number, updates: Partial<User>): Promise<User> => {
+  const updateUser = async (id: string, updates: Partial<User>): Promise<User> => {
     const response = await fetch(`/api/users/${id}`, {
       method: 'PUT',
       headers: {
@@ -68,12 +78,15 @@ export function useUsers(): UseUsersReturn {
       throw new Error('Failed to update user')
     }
 
-    const updatedUser = await response.json()
-    setUsers(prev => prev.map(user => user.id === id ? updatedUser : user))
-    return updatedUser
+    const data = await response.json()
+    if (data && data.id) {
+      setUsers(prev => prev.map(user => user.id === id ? data : user))
+      return data
+    }
+    throw new Error('Invalid response from server')
   }
 
-  const deleteUser = async (id: number): Promise<void> => {
+  const deleteUser = async (id: string): Promise<void> => {
     const response = await fetch(`/api/users/${id}`, {
       method: 'DELETE',
     })
@@ -89,11 +102,16 @@ export function useUsers(): UseUsersReturn {
     fetchUsers()
   }, [])
 
+  const refetch = () => {
+    hasFetched.current = false
+    return fetchUsers()
+  }
+
   return {
     users,
     loading,
     error,
-    refetch: fetchUsers,
+    refetch,
     createUser,
     updateUser,
     deleteUser,

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +12,7 @@ import { UserForm } from "@/components/user-form"
 import { UserDetails } from "@/components/user-details"
 import { useUsers } from "@/hooks/use-users"
 import { useAuth } from "@/hooks/use-auth"
+import { useDashboard } from "@/hooks/use-dashboard"
 import { User } from "@/lib/types"
 import {
   Bot,
@@ -38,6 +40,8 @@ export function AdminDashboard() {
   
   const { users, loading, createUser, updateUser, deleteUser } = useUsers()
   const { user: currentUser, signOut } = useAuth()
+  const { stats, recentBots, recentUsers, loading: dashboardLoading } = useDashboard()
+  
 
   // User management functions
   const handleCreateUser = () => {
@@ -57,7 +61,7 @@ export function AdminDashboard() {
     setUserDetailsOpen(true)
   }
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (userId: string) => {
     try {
       await deleteUser(userId)
     } catch (error) {
@@ -83,37 +87,50 @@ export function AdminDashboard() {
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
-  const stats = [
-    { title: "Total Users", value: "2,847", change: "+12%", icon: Users },
-    { title: "Active Bots", value: "156", change: "+8%", icon: Bot },
-    { title: "Messages Today", value: "18,429", change: "+23%", icon: MessageSquare },
-    { title: "Success Rate", value: "94.2%", change: "+2%", icon: Shield },
+  const statsData = [
+    {   
+      title: "Total Users", 
+      value: stats ? stats.totalUsers.toLocaleString() : (dashboardLoading ? "..." : "0"), 
+      change: "+12%", 
+      icon: Users 
+    },
+    { 
+      title: "Active Bots", 
+      value: stats ? stats.activeBots.toLocaleString() : (dashboardLoading ? "..." : "0"), 
+      change: "+8%", 
+      icon: Bot 
+    },
+    { 
+      title: "Messages Today", 
+      value: stats ? stats.messagesToday.toLocaleString() : (dashboardLoading ? "..." : "0"), 
+      change: "+23%", 
+      icon: MessageSquare 
+    },
+    { 
+      title: "Success Rate", 
+      value: stats ? `${stats.successRate}%` : (dashboardLoading ? "..." : "0%"), 
+      change: "+2%", 
+      icon: Shield 
+    },
   ]
 
-  const recentBots = [
-    { id: 1, name: "Customer Support Bot", status: "active", messages: 1247, accuracy: 96 },
-    { id: 2, name: "Sales Assistant", status: "active", messages: 892, accuracy: 94 },
-    { id: 3, name: "FAQ Helper", status: "training", messages: 0, accuracy: 0 },
-    { id: 4, name: "Product Advisor", status: "active", messages: 634, accuracy: 91 },
-  ]
-
-  const recentUsers = [
-    { id: 1, name: "Sarah Chen", email: "sarah@company.com", role: "Admin", lastActive: "2 min ago" },
-    { id: 2, name: "Mike Johnson", email: "mike@company.com", role: "Editor", lastActive: "1 hour ago" },
-    { id: 3, name: "Emma Davis", email: "emma@company.com", role: "Viewer", lastActive: "3 hours ago" },
-    { id: 4, name: "Alex Rodriguez", email: "alex@company.com", role: "Editor", lastActive: "1 day ago" },
-  ]
 
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className="w-64 bg-sidebar border-r border-sidebar-border">
         <div className="p-6">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Brain className="w-5 h-5 text-primary-foreground" />
+          <div className="flex justify-center mb-8">
+            <div className="w-50% h-50% rounded overflow-hidden">
+              <Image 
+                src="/chatbotlogo.png" 
+                alt="ChatBot Logo" 
+                quality={100}
+                width={16} 
+                height={16} 
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className="text-xl font-semibold text-sidebar-foreground">ChatBot Admin</span>
           </div>
 
           <nav className="space-y-2">
@@ -184,9 +201,10 @@ export function AdminDashboard() {
         <main className="flex-1 overflow-auto p-6">
           {activeTab === "overview" && (
             <div className="space-y-6">
+         
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => {
+                {statsData.map((stat, index) => {
                   const Icon = stat.icon
                   return (
                     <Card key={index}>
@@ -194,7 +212,9 @@ export function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                            <p className="text-2xl font-bold text-card-foreground">{stat.value}</p>
+                            <p className="text-2xl font-bold text-card-foreground">
+                              {stat.value}
+                            </p>
                             <p className="text-xs text-green-500">{stat.change} from last month</p>
                           </div>
                           <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -216,30 +236,42 @@ export function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentBots.map((bot) => (
-                        <div
-                          key={bot.id}
-                          className="flex items-center justify-between p-3 rounded-lg border border-border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                              <Bot className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-card-foreground">{bot.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {bot.messages} messages • {bot.accuracy}% accuracy
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={bot.status === "active" ? "default" : "secondary"}>{bot.status}</Badge>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </div>
+                      {dashboardLoading ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                          <p className="text-muted-foreground mt-2">Loading bots...</p>
                         </div>
-                      ))}
+                      ) : recentBots.length > 0 ? (
+                        recentBots.map((bot) => (
+                          <div
+                            key={bot.id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-border"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Bot className="w-5 h-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-card-foreground">{bot.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {bot.messages} messages • {bot.accuracy}% accuracy
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={bot.status === "active" ? "default" : "secondary"}>{bot.status}</Badge>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-muted-foreground">No bots found</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -251,32 +283,44 @@ export function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentUsers.map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center justify-between p-3 rounded-lg border border-border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={`/.jpg?height=40&width=40&query=${user.name}`} />
-                              <AvatarFallback>
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-card-foreground">{user.name}</p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                      {dashboardLoading ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                          <p className="text-muted-foreground mt-2">Loading users...</p>
+                        </div>
+                      ) : recentUsers.length > 0 ? (
+                        recentUsers.map((user) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-border"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={`/.jpg?height=40&width=40&query=${user.name}`} />
+                                <AvatarFallback>
+                                  {user.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-card-foreground">{user.name}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="outline">{user.role}</Badge>
+                              <p className="text-xs text-muted-foreground mt-1">{user.lastActive}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <Badge variant="outline">{user.role}</Badge>
-                            <p className="text-xs text-muted-foreground mt-1">{user.lastActive}</p>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-muted-foreground">No users found</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>

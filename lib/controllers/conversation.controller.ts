@@ -14,7 +14,7 @@ export class ConversationController {
       // Validate request
       const validation = validateRequest({
         botId: { required: true, type: 'number' },
-        userId: { required: true, type: 'number' },
+        userId: { required: true, type: 'string' },
         title: { type: 'string', maxLength: 255 },
         isTest: { type: 'boolean' }
       }, conversationData)
@@ -70,12 +70,8 @@ export class ConversationController {
         return ApiResponse.badRequest('User ID is required')
       }
 
-      const userIdNum = parseInt(userId)
-      if (isNaN(userIdNum)) {
-        return ApiResponse.badRequest('Invalid user ID')
-      }
-
-      const conversations = await ConversationService.getConversationsByUserId(userIdNum)
+      // User ID is a string (cuid), not a number
+      const conversations = await ConversationService.getConversationsByUserId(userId)
 
       return ApiResponse.success('Conversations retrieved successfully', conversations)
     } catch (error) {
