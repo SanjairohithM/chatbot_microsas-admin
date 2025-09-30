@@ -2,15 +2,15 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
 
-RUN npm install -g pnpm
+RUN npm install
 
 COPY package.json ./
 COPY pnpm-lock.yaml* ./
 COPY package-lock.json* ./
 
 RUN \
-  if [ -f pnpm-lock.yaml ]; then \
-    pnpm install --frozen-lockfile; \
+  if [ -f npm-lock.yaml ]; then \
+     npm install --frozen-lockfile; \
   elif [ -f package-lock.json ]; then \
     npm ci; \
   else \
