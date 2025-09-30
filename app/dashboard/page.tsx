@@ -48,22 +48,22 @@ export default function DashboardOverview() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {statsData.map((stat, index) => {
             const Icon = stat.icon
             return (
-              <Card key={index}>
-                <CardContent className="p-6">
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-8">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                      <p className="text-2xl font-bold text-card-foreground">
+                      <p className="text-base font-medium text-muted-foreground mb-2">{stat.title}</p>
+                      <p className="text-4xl font-bold text-card-foreground mb-2">
                         {stat.value}
                       </p>
-                      <p className="text-xs text-green-500">{stat.change} from last month</p>
+                      <p className="text-sm text-green-500 font-medium">{stat.change} from last month</p>
                     </div>
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-primary" />
+                    <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                      <Icon className="w-8 h-8 text-primary" />
                     </div>
                   </div>
                 </CardContent>
@@ -73,13 +73,13 @@ export default function DashboardOverview() {
         </div>
 
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Bots</CardTitle>
-              <CardDescription>Your latest AI chatbot deployments</CardDescription>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Recent Bots</CardTitle>
+              <CardDescription className="text-base">Your latest AI chatbot deployments</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-4">
                 {dashboardLoading ? (
                   <div className="text-center py-8">
@@ -121,12 +121,12 @@ export default function DashboardOverview() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Users</CardTitle>
-              <CardDescription>Latest user activity and registrations</CardDescription>
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Recent Users</CardTitle>
+              <CardDescription className="text-base">Latest user activity and registrations</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-4">
                 {dashboardLoading ? (
                   <div className="text-center py-8">

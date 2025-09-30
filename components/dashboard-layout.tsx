@@ -50,13 +50,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="w-64 bg-sidebar border-r border-sidebar-border">
         <div className="p-6">
           <div className="flex justify-center mb-8">
-            <div className="w-8 h-8 rounded overflow-hidden">
+            <div className="w-20% h-20% rounded overflow-hidden">
               <Image 
                 src="/chatbotlogo.png" 
                 alt="ChatBot Logo" 
                 quality={100}
-                width={32} 
-                height={32} 
+                width={18} 
+                height={18} 
                 className="w-full h-full object-contain"
               />
             </div>
